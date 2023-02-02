@@ -1,0 +1,35 @@
+version: "3"
+name: mymovie-prod
+
+services:
+  frontend-prod:
+    depends_on:
+      - backend-prod
+    build: 
+      context: mymovie-frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - 80:80
+    environment:
+      API_BASE_URL: ${API_BASE_URL}
+
+  backend-prod:
+    depends_on: 
+      db-prod:
+       condition: service_healthy
+    build: ./mymovie-backend
+    environment:
+      DB_URL: jdbc:mysql://db-prod:${MYSQL_CONTAINER_PORT}/${DB_NAME}
+      DB_USER: mymovie
+      DB_PASSWORD: mymovie
+
+  db-prod:
+    build: ./mymovie-db
+    ports:
+      - ${MYSQL_EXTERNAL_PORT}:${MYSQL_CONTAINER_PORT}
+      - ${MYSQL_EXTERNAL_PORT_2}:${MYSQL_CONTAINER_PORT_2}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 1s
+      timeout: 3s
+      retries: 30

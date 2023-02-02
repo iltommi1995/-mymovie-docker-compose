@@ -1,0 +1,46 @@
+version: "3"
+# Name of the network
+name: mymovie-dev
+# Services of the network
+services:
+
+  frontend-dev:
+    depends_on:
+      - backend-dev
+    build: 
+      context: mymovie-frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - ${ANGULAR_EXTERNAL_PORT}:${ANGULAR_CONTAINER_PORT}
+      - ${ANGULAR_EXTERNAL_PORT_2}:${ANGULAR_CONTAINER_PORT_2}
+    # Volumes to persist data and allow live reload of angular app
+    volumes:
+      - ./mymovie-frontend/src:/app/mymovie-frontend/src
+    environment:
+      API_BASE_URL: ${API_BASE_URL}
+
+  backend-dev:
+    depends_on: 
+      db-dev:
+       condition: service_healthy
+    build: ./mymovie-backend
+    ports:
+      - ${TOMCAT_EXTERNAL_PORT}:${TOMCAT_CONTAINER_PORT}
+    environment:
+      DB_URL: jdbc:mysql://db-dev:${MYSQL_CONTAINER_PORT}/${DB_NAME}
+      DB_USER: mymovie
+      DB_PASSWORD: mymovie
+    volumes:
+      - ./mymovie-backend/:/app/mymovie-backend/
+
+  db-dev:
+    build: ./mymovie-db
+    ports:
+      - ${MYSQL_EXTERNAL_PORT}:${MYSQL_CONTAINER_PORT}
+      - ${MYSQL_EXTERNAL_PORT_2}:${MYSQL_CONTAINER_PORT_2}
+    # Checks that mysql db is started before starting backend service
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
