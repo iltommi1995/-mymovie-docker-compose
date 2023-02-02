@@ -1,0 +1,9 @@
+[submodule "mymovie-db"]
+	path = mymovie-db
+	url = https://github.com/iltommi1995/mymovie-db.git
+[submodule "mymovie-frontend"]
+	path = mymovie-frontend
+	url = https://github.com/iltommi1995/mymovie-frontend.git
+[submodule "mymovie-backend"]
+	path = mymovie-backend
+	url = https://github.com/iltommi1995/mymovie-backend.git
